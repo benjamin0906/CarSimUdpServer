@@ -20,3 +20,15 @@ typedef union
     } Fields;
     uint8 Byte;
 } dtStateMsg;
+
+typedef union
+{
+    struct
+    {
+        uint8 MsgType;
+        uint8 SeqCntr;
+        int16 RefSpeed;
+        int16 RefSWA;
+    } Fields;
+    uint8 Byte;
+} dtRefsMsg;

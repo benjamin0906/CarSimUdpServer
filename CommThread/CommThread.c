@@ -60,7 +60,8 @@ void *CommThreadFunc(void *var)
                         
                         break;
                     case Msg_SetReferences:
-                        
+                        Shared_SetRefSpeed(((dtRefsMsg*)buff)->Fields.RefSpeed);
+                        Shared_SetRefSWA(((dtRefsMsg*)buff)->Fields.RefSWA);
                         break;
                     default:
                         break;
