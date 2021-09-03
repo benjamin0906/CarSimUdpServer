@@ -18,8 +18,6 @@ extern uint32 cntr;
 
 void *CommThreadFunc(void *var)
 {
-    pthread_mutex_t *Mutex = (pthread_mutex_t*)var;
-
     struct sockaddr_in Server;
     struct sockaddr_in client;
     Server.sin_family = AF_INET;
