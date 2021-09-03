@@ -57,7 +57,7 @@ void *CommThreadFunc(void *var)
                         break;
                     }
                     case Msg_SetEngage:
-                        
+                        Shared_SetEngaged(buff[2]);
                         break;
                     case Msg_SetReferences:
                         Shared_SetRefSpeed(((dtRefsMsg*)buff)->Fields.RefSpeed);
