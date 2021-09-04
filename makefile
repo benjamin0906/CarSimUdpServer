@@ -12,5 +12,6 @@ SOURCE+=CommThread/CommThread.c
 SOURCE+=$(UTILITIES_DIR)/Utilities.c
 SOURCE+=$(SHARED_DIR)/Shared.c
 CFLAG=-lpthread
+CFLAG+=-lm
 build:
 	$(CC) $(CFLAG) -o CarSimUdpServer $(SOURCE) $(IDIR)
