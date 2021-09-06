@@ -76,5 +76,33 @@ void SpeedHandler(void)
 
 void SWAHandler(uint8 Engaged)
 {
+    static uint32 PrevTimestamp;
 
+    /* Calculating the current time in [ms] */
+    uint32 Clock = (uint32)((float32)clock()/(CLOCKS_PER_SEC/1000));
+
+    /* Between two millisecond ticks the calculations are not needed */
+    if(PrevTimestamp != Clock)
+    {
+        if(Shared_GetEngaged() == 0)
+        {
+            /* Because of the finite number representation with time the input for the sin() function would overflow
+             * To prevent this only the remainder will be considered */
+            Clock %= SWAOscT;
+
+            int16 TempSWA = (int16)SWAOscAmp*sinf(Clock*2*M_PI/SWAOscT);
+            int16 CurrSWA = Shared_GetCurrSWA();
+
+            if(TempSWA != CurrSWA)
+            {
+                Shared_SetCurrSWA(TempSWA);
+                printf("SWA: %i\n", TempSWA);
+            }
+        }
+        else
+        {
+
+        }
+        PrevTimestamp = Clock;
+    }
 }
