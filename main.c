@@ -24,8 +24,9 @@ int main(uint32 argc, uint8 **argv)
     {
         int16 Speed = round((float32)atoi(argv[1])*250/9);
         Shared_SetRefSpeed(Speed);
-        pthread_t CommThread;
 
+        /* Initialize and start the thread that communicates via UDP */
+        pthread_t CommThread;
         pthread_create(&CommThread, NULL, &CommThreadFunc, NULL);
         pthread_detach(CommThread);
         pthread_join(CommThread, NULL);
@@ -65,7 +66,7 @@ void SpeedHandler(void)
 
         Shared_SetCurrSpeed(Spd);
 
-        printf("Speed: %d\n", Spd);
+        //printf("Speed: %d\n", Spd);
         /* Due to the discrete sampling and the number representation, a second ClockDiff is calculated
          * based on the ChangedSpeed. The Previous timestamp will be the "current time" whick is the sum
          * of the previous timestamp and the calculated time difference.
@@ -81,28 +82,36 @@ void SWAHandler(uint8 Engaged)
     /* Calculating the current time in [ms] */
     uint32 Clock = (uint32)((float32)clock()/(CLOCKS_PER_SEC/1000));
 
-    /* Between two millisecond ticks the calculations are not needed */
+    /* To reduce the cycles that results the same, it calculates only if the time differs */
     if(PrevTimestamp != Clock)
     {
-        if(Shared_GetEngaged() == 0)
+        int16 CurrSWA = Shared_GetCurrSWA();
+        int16 CalcSWA = CurrSWA;
+
+        if(Engaged == 0)
         {
             /* Because of the finite number representation with time the input for the sin() function would overflow
              * To prevent this only the remainder will be considered */
-            Clock %= SWAOscT;
+            uint32 TimeRemainder = Clock % SWAOscT;
 
-            int16 TempSWA = (int16)SWAOscAmp*sinf(Clock*2*M_PI/SWAOscT);
-            int16 CurrSWA = Shared_GetCurrSWA();
-
-            if(TempSWA != CurrSWA)
-            {
-                Shared_SetCurrSWA(TempSWA);
-                printf("SWA: %i\n", TempSWA);
-            }
+            CalcSWA = (int16)SWAOscAmp*sinf(TimeRemainder*2*M_PI/SWAOscT);
         }
         else
         {
+            int16 RefSWA = Shared_GetRefSWA();              //[mrad]
+            uint32 TimeDiff = Clock - PrevTimestamp;        //[ms]
+            int16 SWADiff = (uint32)SWAVel*TimeDiff/1000;  //[mrad]
 
+            if(SWADiff > 0)
+            {
+                if(CurrSWA > RefSWA) CalcSWA = CurrSWA - SWADiff;
+                else CalcSWA = CurrSWA + SWADiff;
+            }
         }
-        PrevTimestamp = Clock;
+        if(CalcSWA != CurrSWA)
+        {
+            Shared_SetCurrSWA(CalcSWA);
+            PrevTimestamp = Clock;
+        }
     }
 }
