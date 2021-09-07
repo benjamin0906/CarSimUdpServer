@@ -34,9 +34,6 @@ void *CommThreadFunc(void *var)
                 uint32 RxLen = recvfrom(s, buff, sizeof(buff), 0, (struct sockaddr *)&client, &ClientAddrSize);
                 if(RxLen > 0)
                 {
-                    for(int i=0; i < RxLen; i++) printf("%x ", buff[i]);
-                    printf("\n");
-
                     /* Checking the sequence counter */
                     if(buff[1] != SeqCntr)
                     {
@@ -47,22 +44,30 @@ void *CommThreadFunc(void *var)
                     {
                     case Msg_StateReq:
                     {
-                        dtStateMsg Msg;
-                        Msg.Fields.MsgType = Msg_State;
-                        Msg.Fields.SeqCntr = SeqCntr;
-                        Msg.Fields.Engaged = Shared_GetEngaged();
-                        Msg.Fields.CurrentSpeed = Shared_GetCurrSpeed();
-                        Msg.Fields.CurrentSWA = Shared_GetCurrSWA();
-                        sendto(s, &Msg.Byte, sizeof(dtStateMsg), 0, (struct sockaddr *)&client, ClientAddrSize);
+                        uint8 Buff[7];
+                        int16 Spd = Shared_GetCurrSpeed();
+                        int16 SWA = Shared_GetCurrSWA();
+                        Buff[0] = Msg_State;
+                        Buff[1] = SeqCntr;
+                        Buff[2] = Shared_GetEngaged();
+                        Buff[3] = Spd >> 8;
+                        Buff[4] = Spd & 0xFF;
+                        Buff[5] = SWA >> 8;
+                        Buff[6] = SWA & 0xFF;
+                        sendto(s, Buff, sizeof(Buff), 0, (struct sockaddr *)&client, ClientAddrSize);
                         break;
                     }
                     case Msg_SetEngage:
                         Shared_SetEngaged(buff[2]);
                         break;
                     case Msg_SetReferences:
-                        Shared_SetRefSpeed(((dtRefsMsg*)buff)->Fields.RefSpeed);
-                        Shared_SetRefSWA(((dtRefsMsg*)buff)->Fields.RefSWA);
+                    {
+                        int16 Spd = buff[2]<<8 | buff[3];
+                        int16 Swa = buff[4]<<8 | buff[5];
+                        Shared_SetRefSpeed(Spd);
+                        Shared_SetRefSWA(Swa);
                         break;
+                    }
                     default:
                         break;
                     }
