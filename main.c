@@ -23,6 +23,8 @@ int main(uint32 argc, uint8 **argv)
     if((argc == 2) && ((*argv[1] >= '0') && (*argv[1] <= '9')))
     {
         int16 Speed = round((float32)atoi(argv[1])*250/9);
+        uint32 LastRefFlagTime=0;
+
         Shared_SetRefSpeed(Speed);
 
         /* Initialize and start the thread that communicates via UDP */
@@ -32,8 +34,18 @@ int main(uint32 argc, uint8 **argv)
         pthread_join(CommThread, NULL);
         while(1)
         {
-            //sleep(1);
             uint8 Engaged = Shared_GetEngaged();
+            uint32 CurrTime = (uint32)((float32)clock()/(CLOCKS_PER_SEC/1000));
+            if((Shared_GetRefFlag() != 0) || (Engaged == 0))
+            {
+                LastRefFlagTime = CurrTime;
+                Shared_SetRefFlag(0);
+            }
+            if((CurrTime - LastRefFlagTime) > 2000)
+            {
+                printf("Reference is late\n");
+                LastRefFlagTime = CurrTime;
+            }
             SpeedHandler();
             SWAHandler(Engaged);
         }

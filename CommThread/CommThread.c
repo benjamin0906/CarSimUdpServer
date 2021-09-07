@@ -66,6 +66,7 @@ void *CommThreadFunc(void *var)
                         int16 Swa = buff[4]<<8 | buff[5];
                         Shared_SetRefSpeed(Spd);
                         Shared_SetRefSWA(Swa);
+                        Shared_SetRefFlag(1);
                         break;
                     }
                     default:

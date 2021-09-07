@@ -6,12 +6,14 @@ pthread_mutex_t MutexRefSpeed;
 pthread_mutex_t MutexRefSWA;
 pthread_mutex_t MutexCurrSpeed;
 pthread_mutex_t MutexCurrSWA;
+pthread_mutex_t MutexRefFlag;
 
 static uint8 Engaged;
 static int16 CurrentSpeed;
 static int16 CurrentSWA;
 static int16 RefSpeed;
 static int16 RefSWA;
+static uint8 RefFlag;
 
 void Shared_Init(void);
 uint8 Shared_GetEngaged(void);
@@ -19,13 +21,14 @@ int16 Shared_GetCurrSpeed(void);
 int16 Shared_GetCurrSWA(void);
 int16 Shared_GetRefSpeed(void);
 int16 Shared_GetRefSWA(void);
+uint8 Shared_GetRefFlag(void);
 
 void Shared_SetEngaged(uint8);
 void Shared_SetCurrSpeed(int16);
 void Shared_SetCurrSWA(int16);
 void Shared_SetRefSpeed(int16);
 void Shared_SetRefSWA(int16);
-
+void Shared_SetRefFlag(uint8);
 
 void Shared_Init(void)
 {
@@ -34,6 +37,7 @@ void Shared_Init(void)
     pthread_mutex_init(&MutexRefSWA, NULL);
     pthread_mutex_init(&MutexCurrSpeed, NULL);
     pthread_mutex_init(&MutexCurrSWA, NULL);
+    pthread_mutex_init(&MutexRefFlag, NULL);
 }
 
 
@@ -82,6 +86,15 @@ int16 Shared_GetRefSWA(void)
     return Ret;
 }
 
+uint8 Shared_GetRefFlag(void)
+{
+    uint8 Ret;
+    pthread_mutex_lock(&MutexRefFlag);
+    Ret = RefFlag;
+    pthread_mutex_unlock(&MutexRefFlag);
+    return Ret;
+}
+
 void Shared_SetEngaged(uint8 ArgEngaged)
 {
     pthread_mutex_lock(&MutexEngaged);
@@ -117,3 +130,9 @@ void Shared_SetRefSWA(int16 SWA)
     pthread_mutex_unlock(&MutexRefSWA);
 }
 
+void Shared_SetRefFlag(uint8 Flag)
+{
+    pthread_mutex_lock(&MutexRefFlag);
+    RefFlag = Flag;
+    pthread_mutex_unlock(&MutexRefFlag);
+}
