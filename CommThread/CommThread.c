@@ -14,7 +14,7 @@ void *CommThreadFunc(void *var)
     struct sockaddr_in client;
     Server.sin_family = AF_INET;
     Server.sin_port = Swap16(9999);
-    Server.sin_addr.s_addr = Swap32(0xC0A80002);
+    Server.sin_addr.s_addr = Swap32(0x00000000);
     int32 s = 0;
 
     s = socket(AF_INET, SOCK_DGRAM, 0);
