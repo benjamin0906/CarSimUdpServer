@@ -12,6 +12,6 @@ SOURCE+=CommThread/CommThread.c
 SOURCE+=$(UTILITIES_DIR)/Utilities.c
 SOURCE+=$(SHARED_DIR)/Shared.c
 CFLAG=-lpthread #For pthread module
-CFLAG+=-lm      #For math module
+CFLAG+=-lm #For math module
 build:
-	$(CC) $(CFLAG) -o CarSimUdpServer $(SOURCE) $(IDIR)
+	$(CC) -o CarSimUdpServer $(SOURCE) $(IDIR) $(CFLAG)
