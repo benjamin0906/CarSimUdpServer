@@ -43,7 +43,8 @@ int main(uint32 argc, uint8 **argv)
             }
             if((CurrTime - LastRefFlagTime) > 2000)
             {
-                printf("Reference is late\n");
+                fprintf(stderr, "Reference is late\n");
+                Shared_SetEngaged(0);
                 LastRefFlagTime = CurrTime;
             }
             SpeedHandler();
